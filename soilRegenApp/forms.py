@@ -189,9 +189,6 @@ class RecipeIngredientForm(forms.ModelForm):
         unit = forms.ModelChoiceField(queryset=Unit.objects.all(), empty_label="Select Unit", required=True)
         category = forms.ModelChoiceField(queryset=IngredientCategory.objects.all(), empty_label="Select Category", required=True)
         type = forms.ModelChoiceField(queryset=IngredientType.objects.all(), empty_label="Select Type", required=True)
-        
-        # Explicitly defined for custom behavior
-        # self.fields['source'].disabled = True
     
     class Meta:
         model = RecipeIngredient

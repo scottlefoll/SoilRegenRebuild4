@@ -121,6 +121,7 @@ select :disabled {
     color:darkgreen;
 }
 
+
 /* Recipe Step CSS ---------------------------------------------------------------------------------*/
 
 p {
@@ -231,6 +232,9 @@ p {
     line-height: 1.43;
 }
 
+
+/* Ingrtedient CSS ----------------------------- */
+
 #btn-new-recipe-ingredient {
   margin: 0;
   margin-left: 0;
@@ -292,16 +296,19 @@ p {
     font-weight: 600;
     padding-left: 0;
     color:darkgreen;
+    background-color:lightyellow;
 }
 
 #id_recipe_ingredient_quantity {
     font-weight: 600;
     padding-left: 3px;
     color:darkgreen;
+    background-color:lightyellow;
 }
 
 #id_recipe_ingredient_unit {
     font-weight: 600;
     padding-left: 0;
     color:darkgreen;
+    background-color:lightyellow;
 }

@@ -574,21 +574,6 @@ class RecipeUpdateView(UpdateView):
                 for field_name, field in context['step_form'].fields.items():
                     field.disabled = True
     
-            # Fetch all recipe ingredients and related data
-            recipe_ingredients = self.object.recipeingredient_set.all().prefetch_related(
-                'ingredient', 'unit', 'source',
-                'ingredient__practice', 'ingredient__ingredient_category',
-                'ingredient__ingredient_type'
-            ).order_by('ingredient__ingredient_name')
-            print("Recipe Ingredients: ", recipe_ingredients)
-            context['recipe_ingredients'] = recipe_ingredients
-            first_ingredient = recipe_ingredients.first()
-            context['ingredient_form'] = RecipeIngredientForm(instance=first_ingredient)
-        
-            # Serialize recipe ingredients to JSON
-            ingredients_json = serializers.serialize('json', recipe_ingredients)
-            context['ingredients_json'] = ingredients_json
-            
             # Disable ingredient form fields if not in edit mode
             if not context['IsEditMode']:
                 for field_name, field in context['ingredient_form'].fields.items():

@@ -62,7 +62,6 @@ def get_ingredient(request, ingredient_id):
         ingredient_dict['practice'] = str(ingredient.practice) if ingredient.practice else None
         ingredient_dict['ingredient_category'] = str(ingredient.ingredient_category) if ingredient.ingredient_category else None
         ingredient_dict['ingredient_type'] = str(ingredient.ingredient_type) if ingredient.ingredient_type else None
-        print("Ingredient_Dict w/related fields: ", ingredient_dict)
         return JsonResponse(ingredient_dict)
     except Ingredient.DoesNotExist:
         return JsonResponse({'error': 'Ingredient not found'}, status=404)

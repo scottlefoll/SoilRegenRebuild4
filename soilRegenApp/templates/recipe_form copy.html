@@ -91,7 +91,6 @@
                         </div>
                     </div>
                 </div>
-
                 <br><br>
                 <div class="row">
                     <!-- Recipe Step List Column -->
@@ -210,8 +209,7 @@
                                                     data-category2="{{ recipe_ingredient.ingredient.ingredient_category.category_name }}"
                                                     data-type2="{{ recipe_ingredient.ingredient.ingredient_type.ingredient_type_name }}"
                                                     data-practice2="{{ recipe_ingredient.ingredient.practice.practice_name }}"
-                                                >                                                    
-                                                    <!-- data-source2="{{ recipe_ingredient.source.source_name }}" -->
+                                                >
                                                     {{ recipe_ingredient.ingredient.ingredient_name }} - {{ recipe_ingredient.ingredient.ingredient_description }}
 
                                                 </a>
@@ -284,8 +282,6 @@
 
     <script type="text/javascript">
         // Variable Initialization Script
-        console.log("Variable Init Script Loading ...");
-
         // check the URL for a curr_id query parameter
         const urlParams = new URLSearchParams(window.location.search);
         let curr_id = urlParams.get('curr_id');
@@ -300,8 +296,6 @@
         // Initialize the steps and ingredients arrays from the JSON data
         var ingredientsArr = JSON.parse("{{ ingredients_json|escapejs }}");
         var stepsArr = JSON.parse("{{ steps_json|escapejs }}");
-        console.log("Ingredients Array = ", ingredientsArr);
-        console.log("Steps Array = ", stepsArr);
     </script>
 
     <script type="text/javascript">
@@ -318,12 +312,6 @@
             let currentIngredientIndex = 0; // Start at the first ingredient
             let currentIngredientId = ingredientsArr[currentIngredientIndex].fields.ingredient.toString();
 
-            // Function to log the steps and ingredients to the console
-            function logData() {
-                console.log("stepsArray: ", stepsArr);
-                console.log("ingredientsArray: ", ingredientsArr);
-            }
-        
             // Function to move to the first step and load its details
             function moveToFirstStep() {
                 if (stepsArr.length > 0) { // Check if there are any steps
@@ -404,13 +392,6 @@
                 document.getElementById("id_recipe_step_description").value = stepArr.recipe_step_description;
                 document.getElementById("id_recipe_step_notes").value = stepArr.recipe_step_notes;
                 document.getElementById("current_step_id").value = stepArr.pk; // Assuming you have a hidden field for current step ID
-
-                console.log('Loading step details');
-                console.log('stepName: ', stepArr.recipe_step_name);
-                console.log('stepNumber: ', stepArr.recipe_step_number);
-                console.log('stepDescription: ', stepArr.recipe_step_description);
-                console.log('stepNotes: ', stepArr.recipe_step_notes);
-                console.log('stepId: ', stepArr.pk);
 
             }
 
@@ -577,7 +558,6 @@
     {% if curr_id %}
     <script>
         // <-Previous & Next-> button code to simulate a click on the list item & load details
-        console.log("A. Simulate click script loaded!");
         document.addEventListener('DOMContentLoaded', function() {
             var currId = "{{ curr_id }}";
     
