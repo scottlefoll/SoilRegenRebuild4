@@ -56,7 +56,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 DATE_FORMAT = 'Y-m-d'
 
@@ -72,7 +72,7 @@ DATABASES = {
         'USER': db_user,
         'PASSWORD': db_password,
         'HOST': db_host,
-        'PORT': db_port,
+        'PORT': db_host,
     }
 }
 

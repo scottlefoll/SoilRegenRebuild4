@@ -34,22 +34,25 @@ from .services import  AmendmentRatioService
 
 # views for static pages
 
-
+@csrf_exempt
 def about_view(request):
     """Render the about page."""
     print("About view is being called")
     return render(request, 'about.html')
 
+@csrf_exempt
 def contact_view(request):
     """Render the contact page."""
     print("Contact view is being called")
     return render(request, 'contact.html')
 
+@csrf_exempt
 def custom_logout(request):
     logout(request)
     print("User has logged out")
     return render(request, 'logged_out.html')
 
+@csrf_exempt
 def get_ingredient(request, ingredient_id):
     try:
         ingredient = Ingredient.objects.select_related(
@@ -66,7 +69,8 @@ def get_ingredient(request, ingredient_id):
         return JsonResponse(ingredient_dict)
     except Ingredient.DoesNotExist:
         return JsonResponse({'error': 'Ingredient not found'}, status=404)
-    
+
+@csrf_exempt
 def get_recipe_step_details(request, recipe_step_id):
     try:
         steps = RecipeStep.objects.get(recipe_step_id=recipe_step_id)
@@ -80,6 +84,7 @@ def get_recipe_step_details(request, recipe_step_id):
     except RecipeStep.DoesNotExist:
         return JsonResponse({'error': 'Recipe step not found'}, status=404)
 
+@csrf_exempt
 def get_recipe_ingredient_details(request, recipe_ingredient_id):
     try:
         ingredients = RecipeIngredient.objects.get(recipe_ingredient_id=recipe_ingredient_id)
@@ -94,6 +99,7 @@ def get_recipe_ingredient_details(request, recipe_ingredient_id):
     except RecipeStep.DoesNotExist:
         return JsonResponse({'error': 'Recipe step not found'}, status=404)
 
+@csrf_exempt
 def get_ingredient_related(request, ingredient_id):
     try:
         ingredient = Ingredient.objects.select_related(
@@ -114,14 +120,17 @@ def get_ingredient_related(request, ingredient_id):
     except Ingredient.DoesNotExist:
         return JsonResponse({'error': 'Ingredient not found'}, status=404)
     
+@csrf_exempt
 def home_view(request):
     """Render the home page."""
     print("Home view is being called")
     return render(request, 'home.html')
 
+@csrf_exempt
 def index(request):
     return render(request, 'home.html')
 
+@csrf_exempt
 def profile_view(request):
     """Render the profile page."""
     print("Profile view is being called")
@@ -495,6 +504,7 @@ class RecipeListView(ListView):
     template_name = 'recipe.html'
     context_object_name = 'recipes'
     
+    @csrf_exempt
     def get_queryset(self):
         # Order recipes by name
         # queryset = Recipe.objects.all().order_by('recipe_name')
@@ -505,6 +515,7 @@ class RecipeListView(ListView):
                 recipe.is_owner = (auth_user_id == recipe.user_id)
         return queryset
 
+    @csrf_exempt
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Include curr_id in context to highlight the current recipe
@@ -517,6 +528,7 @@ class RecipeUpdateView(UpdateView):
     template_name = 'recipe_form.html'
     pk_url_kwarg = 'recipe_id'
 
+    @csrf_exempt
     def get_form(self, form_class=None):
         form = super().get_form(form_class)  # Get the form instance
         mode = self.request.GET.get('mode', '')
@@ -531,11 +543,13 @@ class RecipeUpdateView(UpdateView):
 
         return form
 
+    @csrf_exempt
     def get_success_url(self):
         # Make sure 'id' matches the name of your primary key field
         recipe_id = self.kwargs['recipe_id']
         return reverse_lazy('recipe_list') + '?curr_id=' + str(recipe_id)
 
+    @csrf_exempt
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         mode = self.request.GET.get('mode', '')
@@ -580,6 +594,7 @@ class RecipeDeleteView(DeleteView):
     #     messages.success(request, 'Recipe was deleted successfully!')
     #     return super(RecipeDeleteView, self).delete(request, *args, **kwargs)
 
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         messages.success(request, 'The recipe was successfully deleted!')
         return super(RecipeDeleteView, self).post(request, *args, **kwargs)
@@ -656,7 +671,6 @@ class ReportItemController(View):
         report_item.delete()
         return redirect('report_item_list')
 
-
 class ResetView(PasswordResetView):
     form_class = PasswordResetForm
     template_name = "registration/password_reset.html"
@@ -667,13 +681,15 @@ class ResetView(PasswordResetView):
         print("Sending email")
         return super().form_valid(form)
 
-
 class SignUpView(generic.CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy("login")
     template_name = "registration/signup.html"
 
-
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super(SignUpView, self).dispatch(*args, **kwargs)
+    
 class SoilReportController(View):
     def __init__(self):
         self.api_key = settings.API_KEY
@@ -767,12 +783,14 @@ class UserProfileController(View):
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
+    @csrf_exempt
     def profile_list(self, request):
         print("UserProfile: GET ALL")
         user_profiles = UserProfile.objects.all()
         context = {'user_profiles': sorted(user_profiles, key=lambda profile: profile.user.username)}
         return render(request, 'user_profile_list.html', context)
 
+    @csrf_exempt
     def profile_detail(self, request, user_id):
         try:
             user_profile = UserProfile.objects.get(user_id=user_id)
@@ -823,6 +841,7 @@ class UserProfileController(View):
             user_profile.save()
             return redirect('profile_detail', user_id=user_profile.user.id)
 
+    @csrf_exempt
     # Delete operation
     def delete_profile(self, request, user_id):
         user_profile = get_object_or_404(UserProfile, user_id=user_id)
