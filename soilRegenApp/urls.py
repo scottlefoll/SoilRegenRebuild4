@@ -14,11 +14,13 @@ urlpatterns = [
     path("login/", views.login, name="login"),
     path('custom_logout/', views.custom_logout, name='custom_logout'),
     path("reset/", views.ResetView.as_view(), name="reset"),
-    path('profile/', views.profile_view, name='profile'),
+    path('profile/', views.profile, name='profile'),
 
     path('recipes/', views.RecipeListView.as_view(), name='recipe_list'),
     path('recipes/<int:recipe_id>/', views.RecipeUpdateView.as_view(), name='recipe_detail'),
     path('recipe/update/<int:recipe_id>/', views.RecipeUpdateView.as_view(), name='edit_recipe'),
+    path('recipe/create/', views.RecipeUpdateView.as_view(), name='create_recipe'),
+    
     # path('recipe/update/step/<int:recipe_step_id>/', views.RecipeUpdateStepView.as_view(), name='edit_recipe_step'),
     # path('recipe/update/ingredient/<int:recipe_ingredient_id>/', views.RecipeUpdateIngredientView.as_view(), name='edit_recipe_ingredient'),
     path('get-recipe-step-details/<int:recipe_step_id>/', views.get_recipe_step_details, name='get_recipe_step_details'),
@@ -26,5 +28,6 @@ urlpatterns = [
     path('get-ingredient/<int:ingredient_id>/', views.get_ingredient, name='get_ingredient'),
     path('get-ingredient-related/<int:ingredient_id>/', views.get_ingredient_related, name='get_ingredient-related'),
     path('save-steps-batch/', views.save_steps_batch, name='save_steps_batch'),
+    path('delete_step/<int:recipe_step_id>/', views.delete_step, name='delete_step'),
     path('recipe/delete/<int:pk>/', views.RecipeDeleteView.as_view(), name='delete_recipe'),
 ]

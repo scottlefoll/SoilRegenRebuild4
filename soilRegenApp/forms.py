@@ -1,11 +1,13 @@
 import pandas as pd
 import requests
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.contrib.auth.models import User
 from django import forms
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
+
+from .models import UserProfile
 from .models import Application, IngredientCategory, Farm, Ingredient,Recipe, RecipeStep, RecipeIngredient, Practice, SoilReport, Source, IngredientType, Unit
 
 
@@ -209,3 +211,10 @@ class RecipeIngredientForm(forms.ModelForm):
             'unit': forms.Select(attrs={'id': 'id_recipe_ingredient_unit', 'class': 'form-control'}),
             'recipe_ingredient_notes': forms.Textarea(attrs={'id': 'id_recipe_ingredient_notes', 'required': True, 'rows': 4, 'cols': 40}),
         }
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['street_address', 'town', 'state', 'zip', 'phone', 'notes']
+
+# No need to create a new form for password change, as Django already provides PasswordChangeForm.

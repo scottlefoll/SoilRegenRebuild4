@@ -1,15 +1,89 @@
-<!-- templates/contact.html -->
+<!-- templates/profile.html -->
 {% extends 'base.html' %}
+
+{% load static %}
 
 {% block title %}Profile{% endblock %}
 
+{% block extra_css %} 
+    <link rel="stylesheet" href="{% static 'soilRegenApp/css/profile.css' %}">
+{% endblock %}
+
 {% block content %}
     <div id="content-wrap4">
+        <div class="container mt-4">
 
-        <section>
-            <h2>Profile Settings for {{ user.username }}:</h2>
-        </section>
+            <!-- Display messages -->
+            {% if messages %}
+                <div class="alert alert-info alert-{{ message.tags }}" role="alert">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
         
+            <div id="profile-title-1">
+                <h2>Profile for {{ user.username }}:</h2>
+            </div>
+            <br>
+            <div id="profile-title-2">
+                <h3>Update Profile</h3>
+            </div>
+            <br>
+            <form method="post">
+                {% csrf_token %}
+                <!-- Form Group for Street Address -->
+                <div class="form-group">
+                    <label for="id_street_address">Street Address:</label>
+                    <input type="text" class="form-control" name="street_address" id="id_street_address" value="{{ user_form.instance.street_address }}">
+                </div>
+
+                <!-- Form Group for Town -->
+                <div class="form-group">
+                    <label for="id_town">Town:</label>
+                    <input type="text" class="form-control" name="town" id="id_town" value="{{ user_form.instance.town }}">
+                </div>
+
+                <!-- Form Group for State -->
+                <div class="form-group">
+                    <label for="id_state">State:</label>
+                    <input type="text" class="form-control" name="state" id="id_state" maxlength="2" value="{{ user_form.instance.state }}">
+                </div>
+
+                <!-- Form Group for ZIP -->
+                <div class="form-group">
+                    <label for="id_zip">ZIP:</label>
+                    <input type="text" class="form-control" name="zip" id="id_zip" maxlength="5" value="{{ user_form.instance.zip }}">
+                </div>
+
+                <!-- Form Group for Phone -->
+                <div class="form-group">
+                    <label for="id_phone">Phone:</label>
+                    <input type="text" class="form-control" name="phone" id="id_phone" value="{{ user_form.instance.phone }}">
+                </div>
+
+                <!-- Form Group for Notes -->
+                <div class="form-group">
+                    <label for="id_notes">Notes:</label>
+                    <textarea class="form-control" name="notes" id="id_notes">{{ user_form.instance.notes }}</textarea>
+                </div>
+
+                <div>
+                    <button id="save-profile-btn" type="submit" class="btn btn-primary" name="save_profile">Save Profile</button>
+                </div>
+            </form>
+            <div id="change-password-panel">
+                <div id="profile-title-3">
+                    <h3>Change Password</h3>
+                </div>
+                <br>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ password_form.as_p }}
+                    <button type="submit" class="btn btn-secondary" name="change_password">Change Password</button>
+                </form>
+            </div>
+        </div>
     </div>
     <br><br><br><br>
 {% endblock %}

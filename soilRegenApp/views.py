@@ -5,10 +5,11 @@ import json
 from datetime import datetime, date, timedelta
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.forms import PasswordResetForm, UserCreationForm
+from django.contrib.auth.forms import PasswordResetForm, UserCreationForm, PasswordChangeForm
+from django.contrib.auth.models import User
 from django.contrib.auth.views import PasswordResetView
 from django.core.mail import send_mail
 from django.core.serializers import serialize
@@ -22,13 +23,15 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.template import loader
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_POST
 from django.utils import dateformat, formats, timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views import View, generic
 from django.views.generic import FormView, ListView, DetailView, CreateView, UpdateView, DeleteView
-from .forms import AddFarmForm, DeleteFarmForm, EditRecipeForm, CustomUserCreationForm, RecipeStepForm, RecipeIngredientForm
+from .forms import AddFarmForm, DeleteFarmForm, EditRecipeForm, CustomUserCreationForm, RecipeStepForm, RecipeIngredientForm, UserProfileForm
 from .models import Amendment, AmendmentCategory, AmendmentElement, AmendmentType, Analysis, AnalysisItem
-from .models import Country, Element, Farm, Field, Ingredient, Recipe, RecipeStep, RecipeIngredient, ReportItem, RecipeStep, SoilReport, Source, SourceAmendment, UserProfile
+from .models import Country, Element, Farm, Field, Ingredient, Recipe, RecipeStep, RecipeIngredient
+from .models import ReportItem, RecipeStep, SoilReport, Source, SourceAmendment, UserProfile
 from .services import  AmendmentRatioService
 
 
@@ -51,6 +54,18 @@ def custom_logout(request):
     logout(request)
     print("User has logged out")
     return render(request, 'logged_out.html')
+
+# Delete step operation
+from django.http import JsonResponse
+
+@csrf_exempt
+def delete_step(request, recipe_step_id):
+    try:
+        recipe_step = RecipeStep.objects.get(recipe_step_id=recipe_step_id)
+        recipe_step.delete()
+        return JsonResponse({'message': 'Step deleted successfully'})
+    except RecipeStep.DoesNotExist:
+        return JsonResponse({'error': 'Step not found'}, status=404)
 
 @csrf_exempt
 def get_ingredient(request, ingredient_id):
@@ -135,6 +150,53 @@ def profile_view(request):
     """Render the profile page."""
     print("Profile view is being called")
     return render(request, 'profile.html')
+
+@login_required
+def profile(request):
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+    except UserProfile.DoesNotExist:
+        user_profile = UserProfile(user=request.user)
+    
+    if request.method == 'POST':
+        if 'save_profile' in request.POST:  # Check if we are saving the profile
+            print("Saving profile")
+            user_form = UserProfileForm(request.POST, instance=user_profile)
+            if user_form.is_valid():
+                user_form.save()
+                messages.success(request, "Profile updated successfully.")
+                print(list(messages.get_messages(request)))
+                print("Profile updated successfully")
+                return redirect('profile')
+            else:
+                messages.error(request, "Profile update failed. Please correct the errors below.")
+                print(list(messages.get_messages(request)))
+                print("Profile update failed")
+
+        elif 'change_password' in request.POST:  # Check if we are changing the password
+            print("Changing password")
+            password_form = PasswordChangeForm(request.user, request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)  # Keeps the user logged in after password change
+                messages.success(request, "Password changed successfully.")
+                print(list(messages.get_messages(request)))
+                print("Password changed successfully")
+                return redirect('profile')
+            else:
+                messages.error(request, "Password change failed. Please correct the errors below.")
+                print(list(messages.get_messages(request)))
+                print("Password change failed")
+    else:
+        user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+        user_form = UserProfileForm(instance=user_profile)
+        password_form = PasswordChangeForm(request.user)
+    
+    context = {
+        'user_form': user_form,
+        'password_form': password_form
+    }
+    return render(request, 'profile.html', context)
 
 @csrf_exempt
 def save_steps_batch(request):
@@ -491,6 +553,27 @@ class FieldController(View):
         return redirect('field_list')
 
 
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        user_form = UserProfileForm(request.POST, instance=request.user.userprofile)
+        password_form = PasswordChangeForm(request.user, request.POST)
+        if 'save_profile' in request.POST and user_form.is_valid():
+            user_form.save()
+            # Redirect to prevent form resubmission
+            return redirect('profile')
+        elif 'change_password' in request.POST and password_form.is_valid():
+            user = password_form.save()
+            update_session_auth_hash(request, user)  # Important!
+            return redirect('profile')
+    else:
+        user_form = UserProfileForm(instance=request.user.userprofile)
+        password_form = PasswordChangeForm(request.user)
+    return render(request, 'profile.html', {
+        'user_form': user_form,
+        'password_form': password_form
+    })
+    
 # class RecipeCreateView(CreateView):
 #     model = Recipe
 #     fields = ['recipe_name', 'recipe_description', 'recipe_category', 
@@ -580,7 +663,6 @@ class RecipeUpdateView(UpdateView):
                 'ingredient__practice', 'ingredient__ingredient_category',
                 'ingredient__ingredient_type'
             ).order_by('ingredient__ingredient_name')
-            print("Recipe Ingredients: ", recipe_ingredients)
             context['recipe_ingredients'] = recipe_ingredients
             first_ingredient = recipe_ingredients.first()
             context['ingredient_form'] = RecipeIngredientForm(instance=first_ingredient)
@@ -790,7 +872,7 @@ class SourceController(View):
         return render(request, 'source_detail.html', context)
 
 
-class UserProfileController(View):
+class UserProfileView(View):
     def __init__(self):
         self.api_key = settings.API_KEY
 
