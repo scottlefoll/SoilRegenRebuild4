@@ -1,7 +1,8 @@
 
-from django.urls import include, path
+from django.contrib import admin
 from django.views.generic import TemplateView
-from .views import SignUpView, custom_logout
+from django.urls import include, path
+from .views import SignUpView, custom_logout, profile
 from . import views
 
 urlpatterns = [

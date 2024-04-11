@@ -30,9 +30,31 @@
                 <h3>Update Profile</h3>
             </div>
             <br>
-            <form method="post">
+            <form method="post" action="{% url 'profile' %}">
                 {% csrf_token %}
                 <!-- Form Group for Street Address -->
+                <!-- Username Form Group -->
+                <!-- <div class="form-group">
+                    <label for="id_first_name">First Name:</label>
+                    <input type="text" class="form-control" name="first_name" id="id_first_name" value="{{ user_form.fields.first_name.initial }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_last_name">Last Name:</label>
+                    <input type="text" class="form-control" name="last_name" id="id_last_name" value="{{ user_form.fields.last_name.initial }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="id_username">Username:</label>
+                    <input type="text" class="form-control" name="username" id="id_username" value="{{ user_form.fields.username.initial }}">
+                </div>
+
+                <!-- Email Form Group -->
+                <!-- <div class="form-group">
+                    <label for="id_email">Email:</label>
+                    <input type="email" class="form-control" name="email" id="id_email" value="{{ user_form.fields.email.initial }}">
+                </div> -->
+
                 <div class="form-group">
                     <label for="id_street_address">Street Address:</label>
                     <input type="text" class="form-control" name="street_address" id="id_street_address" value="{{ user_form.instance.street_address }}">
@@ -77,7 +99,7 @@
                     <h3>Change Password</h3>
                 </div>
                 <br>
-                <form method="post">
+                <form method="post" action="{% url 'profile' %}">
                     {% csrf_token %}
                     {{ password_form.as_p }}
                     <button type="submit" class="btn btn-secondary" name="change_password">Change Password</button>

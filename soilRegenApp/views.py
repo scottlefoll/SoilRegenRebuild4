@@ -154,39 +154,51 @@ def profile_view(request):
 @login_required
 def profile(request):
     try:
+        # user_profile, created = UserProfile.objects.get_or_create(user=request.user)
         user_profile = UserProfile.objects.get(user=request.user)
+        # In your profile view, before instantiating the form
+        print("Profile view is being called")
+        print("Username:", request.user.username)
+        print("Email:", request.user.email)
     except UserProfile.DoesNotExist:
         user_profile = UserProfile(user=request.user)
     
     if request.method == 'POST':
-        if 'save_profile' in request.POST:  # Check if we are saving the profile
+        # Correct instantiation of UserProfileForm with user data in your view
+        user_form = UserProfileForm(instance=user_profile, user=request.user)
+        user_form = UserProfileForm(request.POST, instance=user_profile, user=request.user)
+        if 'save_profile' in request.POST:  # Check if saving the profile
             print("Saving profile")
-            user_form = UserProfileForm(request.POST, instance=user_profile)
+            # user_form = UserProfileForm(request.POST, instance=user_profile)
             if user_form.is_valid():
-                user_form.save()
+                # Directly save user profile fields
+                user_profile = user_form.save(commit=False)  # commit=False to not save yet
+                user_profile.user = request.user
+                user_profile.save()
+
+                # Manually save User model fields
+                user = request.user
+                user.username = user_form.cleaned_data['username']
+                user.email = user_form.cleaned_data['email']
+                user.first_name = user_form.cleaned_data['first_name']
+                user.last_name = user_form.cleaned_data['last_name']
+                user.save()
+                
                 messages.success(request, "Profile updated successfully.")
-                print(list(messages.get_messages(request)))
-                print("Profile updated successfully")
                 return redirect('profile')
             else:
                 messages.error(request, "Profile update failed. Please correct the errors below.")
-                print(list(messages.get_messages(request)))
-                print("Profile update failed")
 
-        elif 'change_password' in request.POST:  # Check if we are changing the password
-            print("Changing password")
+        elif 'change_password' in request.POST:  # Check if changing the password
             password_form = PasswordChangeForm(request.user, request.POST)
             if password_form.is_valid():
                 user = password_form.save()
                 update_session_auth_hash(request, user)  # Keeps the user logged in after password change
                 messages.success(request, "Password changed successfully.")
-                print(list(messages.get_messages(request)))
-                print("Password changed successfully")
                 return redirect('profile')
             else:
                 messages.error(request, "Password change failed. Please correct the errors below.")
                 print(list(messages.get_messages(request)))
-                print("Password change failed")
     else:
         user_profile, created = UserProfile.objects.get_or_create(user=request.user)
         user_form = UserProfileForm(instance=user_profile)

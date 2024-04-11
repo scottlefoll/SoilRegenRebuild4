@@ -213,8 +213,22 @@ class RecipeIngredientForm(forms.ModelForm):
         }
 
 class UserProfileForm(forms.ModelForm):
+    username = forms.CharField(max_length=150, required=True) 
+    email = forms.EmailField(required=True)  # Assuming email is not required
+    first_name = forms.CharField(max_length=50, required=True) 
+    last_name = forms.CharField(max_length=50, required=True) 
+
     class Meta:
         model = UserProfile
         fields = ['street_address', 'town', 'state', 'zip', 'phone', 'notes']
+
+    def __init__(self, *args, **kwargs):
+            user = kwargs.pop('user', None)
+            super(UserProfileForm, self).__init__(*args, **kwargs)
+            if user:
+                self.fields['username'].initial = user.username
+                self.fields['email'].initial = user.email
+                self.fields['first_name'].initial = user.first_name
+                self.fields['last_name'].initial = user.last_name
 
 # No need to create a new form for password change, as Django already provides PasswordChangeForm.

@@ -92,7 +92,7 @@
                     </div>
                 </div>
 
-                <br><br><br><br>
+                <br><br>
                 
                 <div class="row">
                     <!-- Recipe Step List Column -->
@@ -166,7 +166,7 @@
                                 {{ step_form.recipe_step_notes }}
                             </div>
                             <div id="current-step-id" hidden></div>
-                            <div class="form-group" id="recipe-detail-btn-box">
+                            <div class="form-group" id="recipe-step-btn-box">
                                 <button type="button" class="btn btn-success" id="btn-previous-step"><-Previous</button>
                                 {% if IsEditMode %}
                                     <button type="button" class="btn btn-danger" id="btn-delete-step" style="display: block;">Delete</button>
@@ -181,7 +181,7 @@
                     </div>
                 </div>
 
-                <br><br><br><br>
+                <br><br>
 
                 <div class="row">
                     <!-- Recipe Ingredient List Column -->
@@ -193,9 +193,9 @@
                                         <form class="form-inline">
                                             <div class="form-group">
                                                 {% if IsEditMode %}
-                                                    <button class="btn btn-success btn-block" id="btn-new-ingredient-step">New Ingredient</button>
+                                                    <button class="btn btn-success btn-block" id="btn-new-ingredient-step">New</button>
                                                 {% else %}
-                                                    <button class="btn btn-success btn-block" id="btn-new-ingredient-step" hidden>New Ingredient</button>
+                                                    <button class="btn btn-success btn-block" id="btn-new-ingredient-step" hidden>Ingredient</button>
                                                 {% endif %}
                                             </div>
                                         </form>
@@ -209,7 +209,8 @@
                                             {% for recipe_ingredient in recipe_ingredients %}
                                                 <a href="#" 
                                                     class="list-group-item list-group-item-action"
-                                                    id="recipe-ingredient-item"                                                    
+                                                    id="recipe-ingredient-item"
+                                                    data-id1=" {{ recipe_ingredient.recipe_ingredient_id }}"
                                                     data-id2="{{ recipe_ingredient.ingredient.ingredient_id }}"
                                                     data-quantity2="{{ recipe_ingredient.recipe_ingredient_quantity }}" 
                                                     data-notes2="{{ recipe_ingredient.recipe_ingredient_notes }}"
@@ -236,7 +237,7 @@
                     <div class="col-md-6 recipe-form-fields" id="recipe-ingredient-item-panel">
                         <form id="recipeIngredientForm" method="post" action="/recipe_update/ingredient/">
                             {% csrf_token %}
-                            <input type="hidden" name="current_ingredient_id" id="current_ingredient_id" value="">
+                            <input type="hidden" name="current_recipe_ingredient_id" id="current_recipe_ingredient_id" value="">
                             <h3 id="recipe-ingredient-form-title">
                                 {% if IsEditMode %}Edit Recipe Ingredient{% else %}Recipe Ingredient Detail{% endif %}
                             </h3>
@@ -272,14 +273,14 @@
                                 <label for="{{ ingredient_form.recipe_ingredient_description.id_for_label }}">Notes:</label>
                                 {{ ingredient_form.recipe_ingredient_notes }}
                             </div>
-                            <div id="recipe-detail-btn-box">
-                                <button type="button" class="btn btn-success" id="btn-previous-ingredient"><-Previous</button>
+                            <div id="recipe-ingredient-btn-box" class="d-flex">
+                                <button type="button" class="btn btn-success me-2" id="btn-previous-ingredient"><-Previous</button>
                                 {% if IsEditMode %}
-                                    <button type="button" class="btn btn-danger" id="btn-delete-ingredient" display="block">Delete</button>
-                                    <button type="button" class="btn btn-danger" id="btn-cancel-ingredient" display="none">Cancel</button>
+                                    <button type="button" class="btn btn-danger" id="btn-delete-ingredient" style="display: block;">Delete</button>
+                                    <button type="button" class="btn btn-danger" id="btn-cancel-ingredient" style="display: none;">Cancel</button>
                                 {% else %}
-                                    <button type="button" class="btn btn-danger" id="btn-delete-ingredient" display="none">Delete</button>
-                                    <button type="button" class="btn btn-danger" id="btn-cancel-ingredient" display="none">Cancel</button>
+                                    <button type="button" class="btn btn-danger" id="btn-delete-ingredient" style="display: none;">Delete</button>
+                                    <button type="button" class="btn btn-danger" id="btn-cancel-ingredient" style="display: none;">Cancel</button>
                                 {% endif %}
                                 <button type="button" class="btn btn-success" id="btn-next-ingredient">Next-></button>
                             </div>
@@ -363,13 +364,13 @@
                 }
             }
 
-            function loadStepDetails(stepArr) {
+            function loadStepDetails(step) {
                 // Update the DOM elements with step details
-                document.getElementById("id_recipe_step_name").value = stepArr.recipe_step_name;
-                document.getElementById("id_recipe_step_number").value = stepArr.recipe_step_number;
-                document.getElementById("id_recipe_step_description").value = stepArr.recipe_step_description;
-                document.getElementById("id_recipe_step_notes").value = stepArr.recipe_step_notes;
-                document.getElementById("current_step_id").value = stepArr.recipe_step_id; // Assuming you have a hidden field for current step ID
+                document.getElementById("id_recipe_step_name").value = step.recipe_step_name;
+                document.getElementById("id_recipe_step_number").value = step.recipe_step_number;
+                document.getElementById("id_recipe_step_description").value = step.recipe_step_description;
+                document.getElementById("id_recipe_step_notes").value = step.recipe_step_notes;
+                document.getElementById("current_step_id").value = step.recipe_step_id; // Assuming you have a hidden field for current step ID
 
             }
 
@@ -488,7 +489,6 @@
                             loadStepDetails(step);
                         }
                     });
-            
                     recipeStepList.appendChild(stepElement);
                 });
             }
@@ -507,7 +507,7 @@
             function moveToNextIngredient() {
                 if (currentIngredientIndex < ingredientsArr.length - 1) {
                     if (isEditMode == 'true') {
-                        saveIngredientDetails(ingredientsArr[currentIngredientIndex]);
+                        saveIngredientDetailsToArray(ingredientsArr[currentIngredientIndex]);
                     }
                     currentIngredientIndex++;
                     loadIngredientDetails(ingredientsArr[currentIngredientIndex]);
@@ -517,25 +517,24 @@
             function moveToPreviousIngredient() {
                 if (currentIngredientIndex > 0) {
                     if (isEditMode === true) {
-                        saveIngredientDetails(ingredientsArr[currentIngredientIndex]);
+                        saveIngredientDetailsToArray(ingredientsArr[currentIngredientIndex]);
                     }
                     currentIngredientIndex--;
                     loadIngredientDetails(ingredientsArr[currentIngredientIndex]);
                 }
             }
 
-            function loadIngredientDetails(ingredientArr) {
-                const ingredient = ingredientsArr.find(ingredient => ingredient.fields.ingredient.toString() === ingredientArr.ingredient.toString());
-
+            function loadIngredientDetails(ingredient) {
+                // const ingredient = ingredientsArr.find(ingredient => ingredient.fields.ingredient.toString() === ingredientArr.ingredient.toString());
                 // Update the DOM elements with ingredient details
-                document.getElementById("id_recipe_ingredient_ingredient").value = ingredientArr.ingredient;
-                document.getElementById("id_recipe_ingredient_quantity").value = ingredientArr.recipe_ingredient_quantity;
-                document.getElementById("id_recipe_ingredient_unit").value = ingredientArr.unit;
-                document.getElementById("id_recipe_ingredient_notes").value = ingredientArr.recipe_ingredient_notes;
-                document.getElementById("current_ingredient_id").value = ingredientArr.id; // Assuming you have a hidden field for current ingredient ID
+                document.getElementById("id_recipe_ingredient_ingredient").value = ingredient.fields.ingredient || '';
+                document.getElementById("id_recipe_ingredient_quantity").value = ingredient.fields.recipe_ingredient_quantity || '';
+                document.getElementById("id_recipe_ingredient_unit").value = ingredient.fields.unit || '';
+                document.getElementById("id_recipe_ingredient_notes").value = ingredient.fields.recipe_ingredient_notes || '';
+                document.getElementById("current_recipe_ingredient_id").value = ingredient.pk || '';
 
                 // Fetch and update the ingredient-related fields
-                loadIngredientRelated(ingredientArr.ingredient);
+                loadIngredientRelated(ingredient.pk);
             }
 
             // Function to fetch and update the ingredient-related fields
@@ -544,7 +543,12 @@
                     ingredientId = ingredientSelect.value;
                 }
                 fetch(`/soilRegenApp/get-ingredient/${ingredientId}/`)
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         descriptionDisplay.textContent = data.ingredient_description || 'Description not available';
                         typeDisplay.textContent = data.ingredient_type || 'Type not available';
@@ -555,13 +559,16 @@
             }
 
             // Listen for changes on the ingredient select dropdown
-            ingredientSelect.addEventListener('change', loadIngredientRelated);
+            // ingredientSelect.addEventListener('change', loadIngredientRelated);
+            ingredientSelect.addEventListener('change', function(event) {
+                loadIngredientRelated(event.target.value);
+            });
 
             // Update description on initial load
             loadIngredientRelated();
 
             // Function to save the ingredient details to the ingredientsArr
-            function saveIngredientDetails() {
+            function saveIngredientDetailsToArray() {
                 // Get the ingredient details from the form
                 const ingredientId = document.getElementById("id_recipe_ingredient_ingredient").value;
                 const quantity = document.getElementById("id_recipe_ingredient_quantity").value;
@@ -595,30 +602,52 @@
             });
 
             function toggleAddStepMode() {
-                console.log('toggle isAddStepMode:', isAddStepMode)
                 isAddStepMode = !isAddStepMode;
-                console.log('toggle isAddStepMode:', isAddStepMode)
                 if (isAddStepMode) {
-                    newStepBtn.style.visibility = 'hidden'; // holds its position
-                    btnCancelStep.style.display = 'block';
+                    newStepBtn.style.visibility = 'hidden'; // hides the button but it holds its position
+                    // btnCancelStep.style.display = 'block';
+                    btnSaveStep.style.display = 'block';
                     btnDeleteStep.style.display = 'none';
-                } else {
+                } else if (isEditMode == 'true') {
                     newStepBtn.style.visibility = 'visible';
-                    btnCancelStep.style.display = 'none';
+                    // btnCancelStep.style.display = 'none';
                     btnDeleteStep.style.display = 'block';
+                } else {
+                    newStepBtn.style.visibility = 'hidden';
+                    // btnCancelStep.style.display = 'none';
+                    btnDeleteStep.style.display = 'none';
                 }
             }
+
+            // Code to delete a ingredient detail item from the ingredient array and move the details form 
+            // to the first ingredient record
+            document.getElementById('btn-delete-ingredient').addEventListener('click', function() {
+                // remove the ingredient from the array
+                deleteIngredient();
+            });
+
+            // Code to cancel a new ingredient detail item, and reset the ingredient detail form
+            // to the first ingredient record
+            document.getElementById('btn-cancel-ingredient').addEventListener('click', function() {
+                toggleAddIngredientMode();
+                moveToFirstIngredient();
+            });
 
             function toggleAddIngredientMode() {
                 isAddIngredientMode = !isAddIngredientMode;
                 if (isAddIngredientMode) {
-                    btnNewRecipeIngredient.style.visibility = 'hidden'; // holds its position
-                    btnCancelIngredient.style.display = 'block';
+                    newIngredientBtn.style.visibility = 'hidden'; // hides the button but it holds its position
+                    // btnCancelIngredient.style.display = 'block';
+                    btnSaveIngredient.style.display = 'block';
                     btnDeleteIngredient.style.display = 'none';
-                } else {
-                    btnNewRecipeIngredient.style.visibility = 'visible';
-                    btnCancelIngredient.style.display = 'none';
+                } else if (isEditMode == 'true') {
+                    newIngredientBtn.style.visibility = 'visible';
+                    // btnCancelIngredient.style.display = 'none';
                     btnDeleteIngredient.style.display = 'block';
+                } else {
+                    newIngredientBtn.style.visibility = 'hidden';
+                    // btnCancelIngredient.style.display = 'none';
+                    btnDeleteIngredient.style.display = 'none';
                 }
             }
 
@@ -626,8 +655,10 @@
             document.getElementById('editRecipeForm').addEventListener('submit', function(event) {
                 // Prevent the default form submission behavior
                 // event.preventDefault();
-                saveStepDetailsToArray(ingredientsArr[currentIngredientIndex].fields)
+                saveStepDetailsToArray(stepArr[currentStepIndex].fields)
                 writeStepDetails();
+                saveIngredientToArray(ingredientsArr[currentIngredientIndex].fields)
+                writeIngredientDetails();
                 console.log('Form submitted');
             });
 
@@ -671,6 +702,41 @@
                 }
             });
 
+            // Respond to a click event on a record in the recipe ingredient list, by
+            // loading the corresponding recipe ingredient data into the ingredient detail form
+            // Attach the event listener to the parent of the recipe ingredients, rather than 
+            // to each individual ingredient item, to avoid attaching multiple listeners and 
+            // to handle dynamically added ingredients.
+            const recipeIngredientList = document.getElementById('recipeIngredientList');
+
+            recipeIngredientList.addEventListener('click', function(e) {
+                console.log("Setting up event listener on recipeIngredientList");
+                console.log(recipeIngredientList);
+
+                // Use event delegation to check if the clicked element is a ingredient item
+                if (e.target && e.target.matches('.list-group-item')) {
+                    e.preventDefault();
+
+                    // Assuming each list-group-item has a data attribute like data-id="ingredientId"
+                    const ingredientId = parseInt(e.target.dataset.id1);
+                    console.log('recipeIngredientId:', ingredientId);
+                    // Save the ingredient to the array before loading the next one
+                    if (isEditMode === 'true') {
+                        saveIngredientDetailsToArray(ingredientsArr[currentIngredientIndex]);
+                    }
+
+                    // Find the ingredient in ingredientsArr with the matching id
+                    const ingredient = ingredientsArr.find(ingredient => ingredient.pk === ingredientId);
+                    if (ingredient) {
+                        currentIngredientIndex = ingredientsArr.findIndex(ingredient => ingredient.recipe_ingredient_id === ingredientId);
+                        console.log('Ingredient to load:', ingredient);
+                        loadIngredientDetails(ingredient);
+                    } else {
+                        console.error('Recipe ingredients ID not found:', ingredientId);
+                    }
+                }
+            });
+
             // Function to add a new step record to the detail form, with empty fields
             newStepBtn.addEventListener('click', function(event) {
                 event.preventDefault(); // Prevent any default button action
@@ -691,6 +757,25 @@
 
                 // set the focus to the first field of the form
                 document.getElementById('id_recipe_step_name').focus();
+            });
+
+            // Function to add a new ingredient record to the detail form, with empty fields
+            newStepBtn.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent any default button action
+                event.stopPropagation(); // Stop the event from propagating to other handlers
+
+                currentIngredientIndex = ingredientsArr.length; // Set to the last step
+                toggleAddIngredientMode();
+
+                // Clear the ingredient form fields
+                document.getElementById("id_recipe_ingredient_ingredient").value = '';
+                document.getElementById("id_recipe_ingredient_quantity").value = '';
+                document.getElementById("id_recipe_ingredient_unit").value = '';
+                document.getElementById("id_recipe_ingredient_notes").value = '';
+                document.getElementById("current_recipe_ingredient_id").value = '';
+
+                // set the focus to the first field of the form
+                document.getElementById('id_recipe_ingredient_name').focus();
             });
         });
     </script>
